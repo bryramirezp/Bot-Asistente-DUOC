@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Duoc UC - Asistente Inteligente (Desarrollo Local)
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 512
+    Environment:
+      Variables:
+        OPENSEARCH_HOST: host.docker.internal:9200
+        EMBEDDINGS_URL: http://host.docker.internal:8001
+        OLLAMA_URL: http://host.docker.internal:11434
+        OLLAMA_MODEL: llama3.1:8b
+        OPENSEARCH_INDEX: duoc-kb
+
+Resources:
+  ChatbotFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../lambda/
+      Handler: function.lambda_handler
+      Runtime: python3.11
+      Description: Orquestador RAG para asistente Duoc UC
+      Events:
+        ChatApi:
+          Type: Api
+          Properties:
+            Path: /chat
+            Method: post
+            RestApiId: !Ref ChatbotApi
+        HealthCheck:
+          Type: Api
+          Properties:
+            Path: /health
+            Method: get
+            RestApiId: !Ref ChatbotApi
+
+  ChatbotApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Cors:
+        AllowMethods: "'GET, POST, OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Requested-With'"
+        AllowOrigin: "'*'"
+
+Outputs:
+  ChatbotApiUrl:
+    Description: "URL del API Gateway local"
+    Value: !Sub "http://localhost:3000/chat"
+  
+  HealthCheckUrl:
+    Description: "URL de health check"
+    Value: !Sub "http://localhost:3000/health"
