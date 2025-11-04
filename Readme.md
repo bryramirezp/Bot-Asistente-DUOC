@@ -6,28 +6,46 @@
 ![API Gateway](https://img.shields.io/badge/API_Gateway-FF4F8B?style=for-the-badge&logo=amazon-api-gateway&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
 ![OpenSearch](https://img.shields.io/badge/OpenSearch-005EB8?style=for-the-badge&logo=opensearch&logoColor=white)
-![SharePoint](https://img.shields.io/badge/SharePoint-0078D4?style=for-the-badge&logo=microsoft-sharepoint&logoColor=white)
 
-## 📋 Resumen del Proyecto
+## 📋 Resumen Ejecutivo
 
-Este proyecto de título aborda la sobrecarga operativa crítica que experimenta la Mesa de Servicio Estudiantil de Duoc UC durante períodos de alta demanda, donde los niveles de atención han caído hasta un **31%** en períodos críticos. El problema se origina en el volumen masivo de consultas repetitivas, donde requerimientos como "Inscripción de Asignaturas" e "Información General" representan el **57%** de todos los llamados gestionados.
+Este proyecto de título aborda la sobrecarga operativa crítica que experimenta la Mesa de Servicio Estudiantil de Duoc UC durante períodos de alta demanda, particularmente en los inicios de semestre académico.
+
+### Problemática Identificada
+
+Durante el período 2024-1 (específicamente marzo), la Mesa de Servicio experimentó:
+
+- 29,550 contactos telefónicos ingresados
+- Solo 11,307 fueron atendidos
+- Nivel de atención del 38% (mínimo crítico)
+- Más del 60% de usuarios sin respuesta
+
+El análisis histórico revela un patrón cíclico predecible con picos de saturación en enero, marzo y agosto, donde el volumen de interacciones supera ampliamente la capacidad del equipo humano de soporte.
 
 ### Solución Propuesta
 
-Diseño y validación de un **Asistente Conversacional Inteligente** basado en:
+Diseño, desarrollo y validación de un **Asistente Conversacional Inteligente** basado en:
 
-- **Arquitectura 100% serverless** en Amazon Web Services (AWS)
-- **Inteligencia Artificial Generativa** mediante Amazon Bedrock
-- **Patrón RAG** (Retrieval Augmented Generation) para respuestas precisas
-- Conexión directa y segura a la base de conocimientos oficial en SharePoint
+- Arquitectura 100% serverless nativa en Amazon Web Services (AWS)
+- Inteligencia Artificial Generativa mediante AWS Bedrock
+- Patrón RAG (Retrieval-Augmented Generation) para garantizar precisión
+- Conexión directa y segura a la base de conocimientos oficial de Duoc UC
 
-### Impacto Esperado
+### Impacto y Valor Agregado
 
-- **Para estudiantes**: Respuestas inmediatas 24/7, eliminando tiempos de espera en períodos peak
-- **Para la institución**: Optimización de recursos humanos (más de 70 personas movilizadas en períodos críticos) y mejora significativa en la eficiencia operativa
+**Para los estudiantes:**
+
+- Respuestas inmediatas y precisas 24/7
+- Eliminación de tiempos de espera en períodos críticos
+- Mejora significativa en la experiencia de atención
+
+**Para la institución:**
+
+- Optimización de recursos humanos y tecnológicos
+- Reducción de la carga operativa sobre el personal de soporte
+- Liberación del equipo para casos de alta complejidad
+- Escalabilidad automática durante picos de demanda
 
 ---
 
@@ -50,41 +68,97 @@ Validar, a través de un proyecto piloto, la efectividad de un asistente convers
 
 ## 🏗️ Arquitectura de la Solución
 
-### Componentes Principales
+### Principios Arquitectónicos
 
-1. **Widget del Chatbot** (HTML/CSS/JavaScript)
-   - Interfaz de usuario para interacción con estudiantes
-   
-2. **Amazon API Gateway**
-   - Punto de acceso seguro con configuración CORS
-   - Protección con AWS WAF y AWS Shield
-   
-3. **AWS Lambda**
-   - Orquestación de la lógica RAG en Python
-   - Invocación de la API RetrieveAndGenerate
-   
-4. **Amazon Bedrock Knowledge Bases**
-   - Motor RAG totalmente gestionado
-   - Conexión nativa a SharePoint
-   - Vectorización con Amazon Titan Text Embeddings
-   - Almacenamiento en Amazon OpenSearch Serverless
-   - Generación con Anthropic Claude 3
+La arquitectura se fundamenta en dos pilares estratégicos:
 
-5. **Servicios de Seguridad**
-   - AWS KMS para cifrado de datos
-   - AWS Secrets Manager para gestión de credenciales
-   - Amazon CloudWatch para monitoreo
-   - AWS X-Ray para trazabilidad
+- Modelo Serverless: Eliminación de gestión de infraestructura, escalabilidad automática y optimización de costos mediante pago por uso
+- Patrón RAG: Mitigación de "alucinaciones" del LLM mediante recuperación de información verificable
 
-### Flujo de Datos
+### Componentes Tecnológicos Clave
+
+1. **Núcleo Cognitivo: Amazon Bedrock Knowledge Bases**
+   - Motor RAG totalmente gestionado que implementa:
+     - Ingesta y Vectorización: Conexión a SharePoint con procesamiento mediante Amazon Titan Text Embeddings V2
+     - Almacenamiento Vectorial: Amazon OpenSearch Serverless para búsquedas semánticas de baja latencia
+     - Orquestación RAG: API RetrieveAndGenerate que automatiza el flujo completo
+     - Generación de Respuesta: Modelo de lenguaje Llama 3.1 8B para síntesis contextualizada
+
+2. **Orquestación y Capa de API**
+   - Amazon API Gateway: Punto de entrada RESTful seguro con gestión de CORS
+   - AWS Lambda: Orquestador principal en Python que invoca Bedrock y formatea respuestas
+
+3. **Servicios de Seguridad y Observabilidad**
+   - AWS WAF y Shield: Protección contra ataques web y DDoS
+   - AWS KMS: Cifrado de datos en reposo
+   - AWS Secrets Manager: Gestión segura de credenciales
+   - Amazon CloudWatch y X-Ray: Monitorización y trazabilidad distribuida
+
+4. **Frontend**
+   - Widget de Chatbot: Interfaz HTML/CSS/JavaScript integrada con API Gateway
+   - **Demo desplegado**: [http://frontend-duocuc-mesa-de-servicio.s3-website-us-east-1.amazonaws.com](http://frontend-duocuc-mesa-de-servicio.s3-website-us-east-1.amazonaws.com)
+     - *Nota*: El widget está creado y desplegado, pero OpenSearch y la parte de IA no están funcionando para evitar incurrir en gastos.
+
+### Diagrama de Arquitectura
 
 ```
-Usuario → Widget → API Gateway → Lambda → Bedrock KB → SharePoint
-↓
-LLM (Claude 3)
-↓
-OpenSearch
+┌─────────────────────────────────────────────────────────────────┐
+│                      FRONTEND (Cliente)                         │
+│                  Widget Chatbot (HTML/JS)                       │
+└────────────────────────┬────────────────────────────────────────┘
+                         │ HTTP POST
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   Amazon API Gateway (REST)                     │
+│              • CORS habilitado                                  │
+│              • Protección WAF/Shield                            │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     AWS Lambda (Python)                         │
+│              • Orquestador del flujo RAG                        │
+│              • Invoca RetrieveAndGenerate API                   │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Amazon Bedrock Knowledge Bases                     │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │  1. Vectorización (Titan Embeddings V2)                   │ │
+│  │  2. Búsqueda Semántica (OpenSearch Serverless)            │ │
+│  │  3. Recuperación de Contexto                              │ │
+│  │  4. Generación LLM (Llama 3.1 8B)                         │ │
+│  └───────────────────────────────────────────────────────────┘ │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Fuente de Datos: SharePoint Duoc UC                │
+│          • Manuales institucionales                             │
+│          • Reglamentos académicos                               │
+│          • FAQs oficiales                                       │
+└─────────────────────────────────────────────────────────────────┘
 ```
+
+### Flujos de Datos Fundamentales
+
+#### Flujo de Ingesta (Asíncrono)
+
+SharePoint → Bedrock KB → Chunking → Titan Embeddings → OpenSearch Serverless
+
+- Sincronización programada desde SharePoint
+- Procesamiento y fragmentación de documentos
+- Conversión a vectores (embeddings)
+- Indexación en OpenSearch para búsquedas
+
+#### Flujo de Consulta (Tiempo Real)
+
+Usuario → Widget → API Gateway → Lambda → Bedrock RetrieveAndGenerate
+                                              ↓
+                                    OpenSearch (recuperación)
+                                              ↓
+                                    LLM (generación) → Respuesta
 
 ---
 

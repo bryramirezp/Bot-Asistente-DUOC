@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Duoc UC - Mesa de Servicio Estudiantil</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -260,12 +263,19 @@
         }
 
         .message-content {
-            max-width: 70%;
+            max-width: 80%; /* Aumentado para mejor visualización */
             padding: 12px 16px;
             border-radius: 15px;
             line-height: 1.5;
             font-size: 0.9rem;
+            word-wrap: break-word;
         }
+        
+        /* Estilos para contenido Markdown */
+        .message-content p { margin-bottom: 0.5em; }
+        .message-content a { color: #0056b3; text-decoration: underline; }
+        .message-content ul, .message-content ol { padding-left: 20px; }
+
 
         .message.bot .message-content {
             background: white;
@@ -278,6 +288,32 @@
             color: #000;
             border-bottom-right-radius: 5px;
         }
+
+        /* --- 3. ESTILOS PARA LAS SUGERENCIAS (CHIPS) AÑADIDOS --- */
+        #suggestion-chips {
+            padding: 0 15px 10px 15px;
+            background: #f9f9f9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            background-color: white;
+            border: 1px solid #ffb800;
+            color: #333;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            background-color: #ffb800;
+            color: #000;
+        }
+        /* ----------------------------------------------------------- */
 
         .chatbot-input {
             padding: 15px;
@@ -380,22 +416,19 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <img src="https://www.duoc.cl/wp-content/themes/wordpress-duoc-cl/images/logo-duoc.svg" alt="Duoc UC" class="logo">
     </header>
 
-    <!-- Hero Section -->
     <section class="hero">
         <h1>Admisión 2026, ¡Matricúlate hoy!</h1>
         <p>Empieza desde donde estés</p>
         <a href="#" class="btn-primary">Comienza Aquí</a>
     </section>
 
-    <!-- Cards Section -->
     <section class="cards-section">
         <div class="card">
-            <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=200&fit=crop" alt="Admisión">
+            <img src="https://images.unsplash.com/photo-1677594334053-afe4b41aa0a3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170" alt="Admisión">
             <div class="card-content">
                 <h3>Admisión 2026</h3>
                 <p>Conoce nuestro proceso de admisión y los requisitos para postular.</p>
@@ -417,7 +450,6 @@
         </div>
     </section>
 
-    <!-- Info Section -->
     <section class="info-section">
         <h2>Somos Duoc UC</h2>
         <div class="stats">
@@ -440,15 +472,14 @@
         </div>
     </section>
 
-    <!-- Chatbot Widget -->
     <div class="chatbot-widget">
         <button class="chatbot-button" id="chatbot-toggle">
-            🎓
+            👩‍💻
         </button>
         <div class="chatbot-window" id="chatbot-window">
             <div class="chatbot-header">
                 <h3>
-                    <span>🎓</span>
+                    <span>👩‍💻</span>
                     Mesa de Servicio Estudiantil
                 </h3>
                 <button class="close-chat" id="close-chat">×</button>
@@ -460,7 +491,14 @@
                     </div>
                 </div>
             </div>
-            <div class="chatbot-input">
+            
+            <div id="suggestion-chips">
+                <button class="chip">Duoc UC está adscrita a la gratuidad?</button>
+                <button class="chip">¿Quién puede ser mi sostenedor?</button>
+                <button class="chip">¿Dónde puedo obtener información sobre los aranceles de cada carrera?</button>
+            </div>
+
+            <div class="chatbot-input" id="chatbot-input">
                 <input type="text" id="user-input" placeholder="Escribe tu pregunta aquí...">
                 <button id="send-message">
                     <i class="fas fa-paper-plane"></i>
@@ -469,103 +507,13 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer>
         <div class="footer-content">
             <p>&copy; 2026 Duoc UC - Instituto Profesional. Todos los derechos reservados.</p>
             <p style="margin-top: 10px; opacity: 0.8;">Mesa de Servicio Estudiantil | Contáctanos: (+56) 2 2999 3862</p>
         </div>
     </footer>
-
-    <script>
-        // Chatbot functionality
-        const chatbotToggle = document.getElementById('chatbot-toggle');
-        const chatbotWindow = document.getElementById('chatbot-window');
-        const closeChat = document.getElementById('close-chat');
-        const sendMessage = document.getElementById('send-message');
-        const userInput = document.getElementById('user-input');
-        const messagesContainer = document.getElementById('chatbot-messages');
-
-        // Toggle chatbot
-        chatbotToggle.addEventListener('click', () => {
-            chatbotWindow.classList.toggle('active');
-        });
-
-        closeChat.addEventListener('click', () => {
-            chatbotWindow.classList.remove('active');
-        });
-
-        // Send message
-        function sendUserMessage() {
-            const message = userInput.value.trim();
-            if (!message) return;
-
-            // Add user message
-            addMessage(message, 'user');
-            userInput.value = '';
-
-            // Simulate bot typing
-            setTimeout(() => {
-                addTypingIndicator();
-                setTimeout(() => {
-                    removeTypingIndicator();
-                    const botResponse = getBotResponse(message);
-                    addMessage(botResponse, 'bot');
-                }, 1500);
-            }, 500);
-        }
-
-        sendMessage.addEventListener('click', sendUserMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendUserMessage();
-        });
-
-        function addMessage(text, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function addTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message bot typing-message';
-            typingDiv.innerHTML = `
-                <div class="message-content">
-                    <div class="typing-indicator">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-            `;
-            messagesContainer.appendChild(typingDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function removeTypingIndicator() {
-            const typingMessage = document.querySelector('.typing-message');
-            if (typingMessage) typingMessage.remove();
-        }
-
-        function getBotResponse(message) {
-            const lowerMessage = message.toLowerCase();
-            
-            if (lowerMessage.includes('inscripción') || lowerMessage.includes('matricula')) {
-                return 'El período de inscripción de asignaturas para el semestre 2026-1 será informado próximamente. Puedes consultar las fechas exactas en nuestro sitio web o contactar directamente a tu sede.';
-            } else if (lowerMessage.includes('carrera') || lowerMessage.includes('estudiar')) {
-                return 'Duoc UC ofrece más de 70 carreras en 9 escuelas diferentes. ¿Te gustaría saber más sobre alguna escuela en particular? Contamos con: Administración y Negocios, Comunicación, Construcción, Diseño, Gastronomía, Informática, Ingeniería, Salud y Turismo.';
-            } else if (lowerMessage.includes('sede') || lowerMessage.includes('campus')) {
-                return 'Tenemos 18 sedes distribuidas a lo largo de Chile. ¿En qué región te encuentras? Puedo ayudarte a encontrar la sede más cercana.';
-            } else if (lowerMessage.includes('costo') || lowerMessage.includes('precio') || lowerMessage.includes('arancel')) {
-                return 'Los aranceles varían según la carrera. Te recomiendo visitar nuestro sitio web o contactar a Admisión al (+56) 227 120640 para información detallada sobre costos y opciones de financiamiento.';
-            } else if (lowerMessage.includes('hola') || lowerMessage.includes('holi')) {
-                return '¡Hola! ¿En qué puedo ayudarte hoy? Puedo responder preguntas sobre admisión, carreras, sedes, aranceles y más.';
-            } else {
-                return 'Gracias por tu consulta. Para información más específica, te recomiendo contactar directamente a nuestra Mesa de Servicio al (+56) 2 2999 3862 o escribirnos por WhatsApp al +56936639565.';
-            }
-        }
-    </script>
+    
+    <script src="js/chatbot.js"></script>
 </body>
 </html>
