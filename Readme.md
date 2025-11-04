@@ -228,7 +228,7 @@ Para validar el sistema sin incurrir en costos de AWS, se implementa un ecosiste
 1. **OpenSearch** - Base de datos vectorial local
 2. **Servicio de Embeddings** - Modelo `sentence-transformers/all-MiniLM-L6-v2` (~100 MB)
 3. **LLM Local** - Llama 3.1 8B via Ollama (quantized)
-4. **AWS SAM** - Simulación de Lambda y API Gateway local
+4. **Serveless Framework** - Simulación de Lambda y API Gateway local
 
 ### Conjunto de Datos de Prueba
 
@@ -290,11 +290,17 @@ Para validar el sistema sin incurrir en costos de AWS, se implementa un ecosiste
 
 ## 👨‍💻 Autor
 
-**Bryan Ramírez Palacios**  
-Ingeniería en Infraestructura y Plataformas Tecnológicas  
+**Bryan Ramírez Palacios**
+Ingeniería en Infraestructura y Plataformas Tecnológicas
 Duoc UC - Escuela de Informática y Telecomunicaciones
 
 **Docente Guía**: Claudio Núñez
+
+### 📁 Recursos del Proyecto
+
+- **Carpeta completa del proyecto**: [Google Drive](https://drive.google.com/drive/folders/1ajL1A5PTd4-0Wlte4YdRQdZ-uh3eWy5K)
+- **Bitácora de trabajo**: [Google Docs](https://docs.google.com/document/d/1_n-UU1rDAuizTucAiZUDNYJATKrEnnpawhlmRTQ4XVc/edit?usp=sharing)
+- **Informe final (Word)**: [Google Docs](https://docs.google.com/document/d/1sDiCfvqCBfJyFz_vuaKyieyLOIPPmjjt/edit?usp=sharing&ouid=103942992173874091609&rtpof=true&sd=true)
 
 ---
 
