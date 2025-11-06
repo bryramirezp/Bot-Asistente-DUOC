@@ -219,32 +219,12 @@ Usuario → Widget → API Gateway → Lambda → Bedrock RetrieveAndGenerate
 
 ---
 
-## 🧪 Estrategia de Pruebas y Control de Costos
-
-### Arquitectura de Simulación Local
-
-Para validar el sistema sin incurrir en costos de AWS, se implementa un ecosistema Docker con:
-
-1. **OpenSearch** - Base de datos vectorial local
-2. **Servicio de Embeddings** - Modelo `sentence-transformers/all-MiniLM-L6-v2` (~100 MB)
-3. **LLM Local** - Llama 3.1 8B via Ollama (quantized)
-4. **Serveless Framework** - Simulación de Lambda y API Gateway local
-
-### Conjunto de Datos de Prueba
-
-- 3-5 documentos PDF clave (Reglamento Académico, guías de inscripción, FAQs)
-- Segmentación en chunks con metadatos
-- Casos de prueba representativos de consultas reales
-
----
-
 ## 🔐 Seguridad y Mejores Prácticas
 
 - **Principio de mínimo privilegio** en roles IAM
 - **Cifrado en reposo** con AWS KMS
 - **Gestión segura de secretos** con AWS Secrets Manager
 - **Protección perimetral** con AWS WAF y AWS Shield
-- **Infraestructura como Código** (IaC) con CloudFormation/Terraform
 - **Entornos efímeros** para optimización de costos
 
 ---

@@ -1,0 +1,34 @@
+# 1. Navegar al directorio del proyecto
+cd e:/Bot-Asistente-DUOC/scraping
+
+# 2. Crear entorno virtual
+python -m venv duoc_crawler_env
+
+# 3. Activar entorno virtual
+# En Windows:
+duoc_crawler_env\Scripts\activate
+# En Linux/Mac:
+source duoc_crawler_env/bin/activate
+
+# 4. Instalar dependencias desde requirements.txt
+pip install -r requirements.txt
+
+# 5. Exportar dependencias actuales
+pip freeze > requirements.txt
+
+# 6. Verificar paquetes instalados
+pip list
+
+# 7. Verificar paquetes desactualizados
+pip list --outdated
+
+# 8. Comprobación de entorno
+which python   # Linux/Mac
+where python   # Windows
+
+# 9. Desactivar entorno virtual
+deactivate
+
+# 10. Eliminar entorno virtual (si necesitas recrearlo)
+rm -rf duoc_crawler_env      # Linux/Mac
+rmdir /s duoc_crawler_env    # Windows

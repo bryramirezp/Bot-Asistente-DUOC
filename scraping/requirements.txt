@@ -1,0 +1,18 @@
+# Core dependencies for the improved Duoc crawler
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Optional dependencies for enhanced functionality
+aiohttp>=3.8.0          # For async requests (if you want to upgrade to async)
+tqdm>=4.65.0            # Alternative progress bars
+pandas>=2.0.0           # For data analysis and CSV export
+numpy>=1.24.0           # For data processing
+fake-useragent>=1.4.0   # More realistic user agents
+python-dotenv>=1.0.0    # For environment variable management
+
+# Development dependencies (optional)
+pytest>=7.4.0          # For testing
+black>=23.0.0           # For code formatting
+flake8>=6.0.0           # For linting
+mypy>=1.5.0             # For type checking

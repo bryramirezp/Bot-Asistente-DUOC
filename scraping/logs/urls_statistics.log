@@ -1,0 +1,3 @@
+2025-11-06 13:10:48,448 - STATISTICS | Section: admision | Discovered: 65 | Processed: 65 | Successful: 64 | Failed: 1 | Success_Rate: 98.5% | Total_Time: 66.5s | Avg_Time_Per_URL: 1.023s
+2025-11-06 13:16:18,733 - STATISTICS | Section: carreras | Discovered: 74 | Processed: 74 | Successful: 73 | Failed: 1 | Success_Rate: 98.6% | Total_Time: 85.5s | Avg_Time_Per_URL: 1.155s
+2025-11-06 13:22:07,969 - STATISTICS | Section: oferta-academica | Discovered: 67 | Processed: 67 | Successful: 64 | Failed: 3 | Success_Rate: 95.5% | Total_Time: 92.8s | Avg_Time_Per_URL: 1.386s
