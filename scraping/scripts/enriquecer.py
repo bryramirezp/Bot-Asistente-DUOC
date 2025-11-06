@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 # --- Configuración ---
 load_dotenv() 
 
-API_KEY = "a3644c84e2e445c2a732ba9dbad689d2.djU20ZXVpNmaOmtM"
-API_URL = "https://api.z.ai/api/coding/paas/v4/chat/completions"
+API_KEY = "xD"
+API_URL = "xD"
 MODELO = "glm-4.6"
 INPUT_FILE = 'chunks_para_ia.jsonl'
 OUTPUT_FILE = 'dataset_final_scraper.jsonl'
