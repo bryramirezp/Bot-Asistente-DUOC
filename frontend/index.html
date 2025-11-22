@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Duoc UC - Mesa de Servicio Estudiantil</title>
+    <title>Duoc UC - Mesa de Servicio</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
@@ -227,6 +227,12 @@
             gap: 10px;
         }
 
+        .chatbot-header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         .close-chat {
             background: none;
             border: none;
@@ -239,6 +245,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: opacity 0.2s;
+        }
+
+        .close-chat:hover {
+            opacity: 0.7;
+        }
+
+        .chatbot-warning {
+            background-color: #dc3545;
+            color: white;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            text-align: center;
+            border-radius: 0;
+            font-weight: 500;
+            margin: 0;
         }
 
         .chatbot-messages {
@@ -273,8 +296,84 @@
         
         /* Estilos para contenido Markdown */
         .message-content p { margin-bottom: 0.5em; }
-        .message-content a { color: #0056b3; text-decoration: underline; }
+        .message-content a { 
+            color: #0056b3; 
+            text-decoration: underline; 
+            word-break: break-word;
+            transition: color 0.2s;
+        }
+        .message-content a:hover {
+            color: #003d82;
+            text-decoration: underline;
+        }
+        .message-content a:visited {
+            color: #551a8b;
+        }
         .message-content ul, .message-content ol { padding-left: 20px; }
+        
+        /* Estilos para fuentes/citas */
+        .sources-message {
+            margin-top: 10px;
+        }
+        
+        .sources-content {
+            font-size: 0.85rem;
+            background: #f0f0f0 !important;
+            border: 1px solid #ddd;
+            padding: 12px;
+        }
+        
+        .sources-header {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .sources-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .source-item {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #ffb800;
+        }
+        
+        .source-name {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .source-link {
+            display: inline-block;
+            color: #0056b3;
+            text-decoration: underline;
+            font-weight: 600;
+            margin-bottom: 4px;
+            word-break: break-all;
+            transition: color 0.2s;
+        }
+        
+        .source-link:hover {
+            color: #003d82;
+            text-decoration: underline;
+        }
+        
+        .source-link:visited {
+            color: #551a8b;
+        }
+        
+        .source-excerpt {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
 
 
         .message.bot .message-content {
@@ -413,6 +512,203 @@
                 transform: translateY(-10px);
             }
         }
+
+        /* Modal de Sugerencias */
+        .suggestions-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .suggestions-modal.active {
+            display: flex;
+        }
+
+        .suggestions-modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .suggestions-modal-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .suggestions-modal-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            opacity: 0.7;
+        }
+
+        .suggestions-form {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffb800;
+            box-shadow: 0 0 0 2px rgba(255, 184, 0, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel, .btn-submit {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background-color: #d0d0d0;
+        }
+
+        .btn-submit {
+            background-color: #ffb800;
+            color: #000;
+        }
+
+        .btn-submit:hover {
+            background-color: #ffc107;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(255, 184, 0, 0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Notificaciones del formulario de sugerencias */
+        .notification {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: notificationSlideIn 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes notificationSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .notification.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .notification.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .notification-icon {
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -480,14 +776,21 @@
             <div class="chatbot-header">
                 <h3>
                     <span>👩‍💻</span>
-                    Mesa de Servicio Estudiantil
+                    Mesa de Servicio
                 </h3>
-                <button class="close-chat" id="close-chat">×</button>
+                <div class="chatbot-header-actions">
+                    <button class="close-chat" id="suggestions-btn" title="Enviar sugerencia">💡</button>
+                    <button class="close-chat" id="clear-history" title="Limpiar historial">🗑️</button>
+                    <button class="close-chat" id="close-chat" title="Cerrar">×</button>
+                </div>
+            </div>
+            <div class="chatbot-warning">
+                Este asistente puede cometer errores o alucinar información. Aún está en fase de desarrollo.
             </div>
             <div class="chatbot-messages" id="chatbot-messages">
                 <div class="message bot">
                     <div class="message-content">
-                        ¡Hola! Soy el asistente virtual de la Mesa de Servicio Estudiantil de Duoc UC. ¿En qué puedo ayudarte hoy?
+                        ¡Hola! Soy el asistente virtual de la Mesa de Servicio de Duoc UC. ¿En qué puedo ayudarte hoy?
                     </div>
                 </div>
             </div>
@@ -507,13 +810,65 @@
         </div>
     </div>
 
+    <!-- Modal de Sugerencias -->
+    <div id="suggestions-modal" class="suggestions-modal">
+        <div class="suggestions-modal-content">
+            <div class="suggestions-modal-header">
+                <h3>💡 Enviar Sugerencia</h3>
+                <button class="close-modal" id="close-suggestions-modal">×</button>
+            </div>
+            <form id="suggestions-form" class="suggestions-form">
+                <div id="suggestions-notification" class="notification" style="display: none;"></div>
+                <div class="form-group">
+                    <label for="suggestion-message">Tu sugerencia o comentario:</label>
+                    <textarea 
+                        id="suggestion-message" 
+                        name="message" 
+                        rows="5" 
+                        placeholder="Escribe tu sugerencia aquí..."
+                        required
+                    ></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancel-suggestions">Cancelar</button>
+                    <button type="submit" class="btn-submit">Enviar Sugerencia</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Limpiar Historial -->
+    <div id="clear-history-modal" class="suggestions-modal">
+        <div class="suggestions-modal-content">
+            <div class="suggestions-modal-header">
+                <h3>🗑️ Limpiar Historial</h3>
+                <button class="close-modal" id="close-clear-history-modal">×</button>
+            </div>
+            <div class="suggestions-form">
+                <div style="padding: 20px; text-align: center;">
+                    <p style="font-size: 1rem; color: #333; margin-bottom: 25px; line-height: 1.6;">
+                        ¿Estás seguro que quieres borrar el historial de conversación?
+                    </p>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px;">
+                        Esta acción no se puede deshacer. Se eliminará todo el historial de mensajes y comenzarás una nueva sesión.
+                    </p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancel-clear-history">Cancelar</button>
+                    <button type="button" class="btn-submit" id="confirm-clear-history">Sí, borrar historial</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="footer-content">
             <p>&copy; 2026 Duoc UC - Instituto Profesional. Todos los derechos reservados.</p>
-            <p style="margin-top: 10px; opacity: 0.8;">Mesa de Servicio Estudiantil | Contáctanos: (+56) 2 2999 3862</p>
+            <p style="margin-top: 10px; opacity: 0.8;">Mesa de Servicio | Contáctanos: (+56) 2 2999 3862</p>
         </div>
     </footer>
     
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="js/chatbot.js"></script>
 </body>
 </html>

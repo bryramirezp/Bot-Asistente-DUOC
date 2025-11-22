@@ -7,6 +7,12 @@
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![OpenSearch](https://img.shields.io/badge/OpenSearch-005EB8?style=for-the-badge&logo=opensearch&logoColor=white)
+![AWS WAF](https://img.shields.io/badge/AWS_WAF-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![AWS Shield](https://img.shields.io/badge/AWS_Shield-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![AWS KMS](https://img.shields.io/badge/AWS_KMS-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![AWS Secrets Manager](https://img.shields.io/badge/AWS_Secrets_Manager-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Amazon CloudWatch](https://img.shields.io/badge/Amazon_CloudWatch-FF4F8B?style=for-the-badge&logo=amazon-cloudwatch&logoColor=white)
+![AWS X-Ray](https://img.shields.io/badge/AWS_X--Ray-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
 
 ## 📋 Resumen Ejecutivo
 
@@ -92,7 +98,8 @@ La arquitectura se fundamenta en dos pilares estratégicos:
    - AWS WAF y Shield: Protección contra ataques web y DDoS
    - AWS KMS: Cifrado de datos en reposo
    - AWS Secrets Manager: Gestión segura de credenciales
-   - Amazon CloudWatch y X-Ray: Monitorización y trazabilidad distribuida
+   - Amazon CloudWatch: Monitorización implementada (logs, métricas, alarmas)
+   - AWS X-Ray: Trazabilidad distribuida implementada
 
 4. **Frontend**
    - Widget de Chatbot: Interfaz HTML/CSS/JavaScript integrada con API Gateway
@@ -189,6 +196,8 @@ Usuario → Widget → API Gateway → Lambda → Bedrock RetrieveAndGenerate
 - Vectorización automática de documentos
 - Desarrollo en Python con AWS SDK (Boto3)
 - Configuración de variables de entorno y permisos IAM
+- CloudWatch implementado para logging y monitoreo de Lambda
+- X-Ray implementado para trazabilidad distribuida
 
 ---
 
@@ -206,7 +215,7 @@ Usuario → Widget → API Gateway → Lambda → Bedrock RetrieveAndGenerate
 - Validación de flujo extremo a extremo
 - Evaluación de calidad de respuestas
 - Mitigación de alucinaciones del modelo
-- Monitoreo con CloudWatch y X-Ray
+- Monitoreo con CloudWatch y X-Ray (implementados)
 
 ---
 
