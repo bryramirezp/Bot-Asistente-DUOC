@@ -303,6 +303,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return div.innerHTML;
         },
 
+        preprocessMarkdown(text) {
+            if (!text) return "";
+
+            // 1. Normalizar saltos de línea
+            let processed = text.replace(/\r\n/g, '\n');
+
+            // 2. Asegurar que las listas tengan un salto de línea antes si vienen después de dos puntos
+            // Ejemplo: "son: - item" -> "son:\n\n- item"
+            processed = processed.replace(/([^\n])\s*[:]\s*([-*•]|\d+\.)\s+/g, '$1:\n\n$2 ');
+
+            // 3. Normalizar viñetas (bullets) a guiones para consistencia en Markdown
+            // Reemplaza '•' al inicio de línea (o después de newline) por '- '
+            processed = processed.replace(/(^|\n)[ \t]*[•][ \t]+/g, '$1- ');
+
+            return processed;
+        },
+
         addMessage(text, type) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}`;
@@ -310,8 +327,11 @@ document.addEventListener('DOMContentLoaded', () => {
             contentDiv.className = 'message-content';
 
             if (type === 'bot') {
+                // Preprocesar el texto para corregir formato de listas y viñetas
+                const processedText = this.preprocessMarkdown(text);
+
                 // 1. Convertir el Markdown a HTML
-                const rawHtml = marked.parse(text || "");
+                const rawHtml = marked.parse(processedText || "");
                 
                 // 2. SANITIZAR el HTML antes de insertarlo
                 const cleanHtml = DOMPurify.sanitize(rawHtml, {

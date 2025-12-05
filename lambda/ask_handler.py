@@ -33,10 +33,11 @@ if MODEL_ID:
     MODEL_ARN = f'arn:aws:bedrock:{AWS_REGION}::foundation-model/{MODEL_ID}'
 
 # Variables opcionales con valores por defecto
-TEMPERATURE = float(os.environ.get('TEMPERATURE', '0.2'))
-MAX_TOKENS = int(os.environ.get('MAX_TOKENS', '1024'))
-MAX_QUERY_LENGTH = int(os.environ.get('MAX_QUERY_LENGTH', '5000'))
-MAX_CONTEXT_MESSAGES = int(os.environ.get('MAX_CONTEXT_MESSAGES', '10'))
+TEMPERATURE = float(os.environ.get('TEMPERATURE'))
+TOP_P = float(os.environ.get('TOP_P'))  # Valor recomendado para controlar la masa hilada
+MAX_TOKENS = int(os.environ.get('MAX_TOKENS'))
+MAX_QUERY_LENGTH = int(os.environ.get('MAX_QUERY_LENGTH'))
+MAX_CONTEXT_MESSAGES = int(os.environ.get('MAX_CONTEXT_MESSAGES'))
 
 # Validar que TEMPERATURE esté en rango válido (0.0 a 1.0)
 if not 0.0 <= TEMPERATURE <= 1.0:
@@ -59,6 +60,12 @@ MAX_CITATIONS = int(os.environ.get('MAX_CITATIONS', '5'))
 # Variables de entorno para LLM Guard
 LLM_GUARD_ENABLED = os.environ.get('LLM_GUARD_ENABLED', 'false').lower() == 'true'
 LLM_GUARD_THRESHOLD = float(os.environ.get('LLM_GUARD_THRESHOLD', '0.5'))
+
+# --- NUEVO: CONFIGURACIÓN DE GUARDRAILS DE BEDROCK ---
+# ID del Guardrail: Duoc_uc_agente
+GUARDRAIL_ID = os.environ.get('GUARDRAIL_ID', '0vix46kwrtvl')
+# Versión del Guardrail (Use 'DRAFT' mientras prueba, luego cambie a '1')
+GUARDRAIL_VERSION = os.environ.get('GUARDRAIL_VERSION', 'DRAFT')
 
 # Variables de entorno para Query Optimization (Phase 2)
 QUERY_OPTIMIZATION_ENABLED = os.environ.get('QUERY_OPTIMIZATION_ENABLED', 'true').lower() == 'true'
@@ -632,6 +639,38 @@ CHIT_CHAT_PATTERNS = {
 }
 
 
+# NUEVO: Patrones de seguridad y hostilidad
+SAFETY_PATTERNS = {
+    r'\b(matar|muerete|morir|asesinar|golpear|pegar)\b':
+        "Como asistente virtual, no tolero lenguaje violento o amenazas. Por favor, mantengamos una conversación respetuosa.",
+    
+    r'\b(imb(é|e)cil|idiota|est(ú|u)pido|tonto|weon|aweonao|mierda|basura|in(ú|u)til|callate)\b':
+        "Entiendo que puedas estar frustrado, pero estoy aquí para ayudarte. Por favor, utilicemos un lenguaje adecuado para continuar.",
+        
+    r'\b(odio|te odio|apestas)\b':
+        "Lamento que te sientas así. Mi objetivo es ayudarte con información sobre Duoc UC. ¿Podemos intentar con otra pregunta?"
+}
+
+
+def handle_safety_check(query: str) -> Optional[str]:
+    """
+    Verifica si el query contiene lenguaje ofensivo o amenazas.
+    
+    Args:
+        query: Query del usuario a verificar
+        
+    Returns:
+        Respuesta de seguridad si detecta lenguaje inapropiado, None si es seguro
+    """
+    query_lower = query.lower().strip()
+    
+    for pattern, response in SAFETY_PATTERNS.items():
+        if re.search(pattern, query_lower, re.IGNORECASE):
+            logger.info(f"Safety check triggered: '{query}' -> respuesta de seguridad")
+            return response
+    return None
+
+
 def handle_chit_chat(query: str) -> Optional[str]:
     """
     Verifica si el query es chit-chat y devuelve una respuesta predefinida.
@@ -772,6 +811,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if not query:
             logger.warning("Solicitud recibida sin una consulta (query).", extra={'request_id': request_id})
             return create_response(400, {'error': 'El campo "query" es requerido.'}, request_id)
+        
+        # 1. NUEVO: Verificar seguridad ANTES de chit-chat o RAG
+        safety_response = handle_safety_check(query)
+        if safety_response:
+            logger.info(f"Safety check triggered for query: '{query}'")
+            return create_response(200, {
+                'answer': safety_response,
+                'sources': [],
+                'request_id': request_id
+            }, request_id)
         
         # Router de chit-chat: detecta modismos chilenos y frases coloquiales
         # Si es chit-chat, retornar respuesta programada sin llamar a RAG
@@ -969,35 +1018,25 @@ INSTRUCCIONES DE FORMATO (MUY IMPORTANTE):
 
 - Tu respuesta final debe ser profesional, limpia y fácil de leer.
 
-- **Usa Markdown simple** para estructurar tu respuesta.
+- Si la respuesta tiene múltiples puntos, organízalos con guiones (-) sin números.
 
-- **Enlaces (Links):** Formatea los enlaces usando Markdown: `[Texto del enlace](url)`.
+- No uses separadores visuales (como `---`, `***`, `===`).
 
-- **Listas:** Si la respuesta es una lista, formátala como una lista de Markdown (usando `- `). Asegúrate de que haya un salto de línea antes del primer elemento.
-
-- **Ejemplo de formato de lista:**
-
-El asistente debe responder:
-
-Aquí tienes los requisitos:
-
-- Requisito A.
-
-- Requisito B.
-
-- Requisito C.
+- Incluye URLs directas si están disponibles en los resultados.
 
 ---
 
 RESULTADOS DE BÚSQUEDA:
-
 $search_results$
 
-PREGUNTA DEL USUARIO:
+---
 
+PREGUNTA DEL USUARIO:
 $query$
 
-RESPUESTA LIMPIA Y FORMATEADA (en Markdown):"""
+---
+
+RESPUESTA (clara, directa, sin separadores al inicio):"""
 
         response = bedrock_agent_runtime.retrieve_and_generate(
             input={'text': contextual_query},
@@ -1007,9 +1046,16 @@ RESPUESTA LIMPIA Y FORMATEADA (en Markdown):"""
                     'knowledgeBaseId': KNOWLEDGE_BASE_ID,
                     'modelArn': MODEL_ARN,
                     'generationConfiguration': {
+                        # --- INICIO DE NUEVA CONFIGURACIÓN GUARDRAIL ---
+                        'guardrailConfiguration': {
+                            'guardrailId': GUARDRAIL_ID,
+                            'guardrailVersion': GUARDRAIL_VERSION
+                        },
+                        # --- FIN DE NUEVA CONFIGURACIÓN GUARDRAIL ---
                         'inferenceConfig': {
                             'textInferenceConfig': {
                                 'temperature': TEMPERATURE,
+                                'topP': TOP_P,
                                 'maxTokens': MAX_TOKENS,
                             }
                         },
@@ -1038,22 +1084,33 @@ RESPUESTA LIMPIA Y FORMATEADA (en Markdown):"""
         # Validar output antes de retornar
         answer = output_validator.filter_response(answer)
 
-        # --- INICIO DE FILTROS REGEX PARA LIMPIEZA DE ARTEFACTOS ---
+        # --- LIMPIEZA AGRESIVA DE ARTEFACTOS ---
         
-        # 1. Filtro RegEx para artefactos conocidos (Step 1, Step 2, etc.)
-        answer = re.sub(r'Step\s*\d+', '', answer, flags=re.IGNORECASE)
-        answer = re.sub(r'SEQ_(STARTX|ENDX|ANYWHERE):[\d,]+', '', answer, flags=re.IGNORECASE)
+        # 1. Eliminar "Pregunta:" y "Respuesta:" al inicio
+        answer = re.sub(r'^[\s:]*(?:pregunta|respuesta|explicación|descripción)[\s:]*', '', answer, flags=re.IGNORECASE | re.MULTILINE)
         
-        # 2. NUEVO FILTRO: Eliminar marcadores de citación tipo [1], [2], etc.
-        #    Esto busca un espacio (opcional) seguido de un [número]
-        #    y lo reemplaza con un solo espacio para no pegar palabras.
+        # 2. Eliminar separadores `: ---`, `---`, `***` al inicio
+        answer = re.sub(r'^[\s:]*(?:---|\\*\\*\\*|===|--+)\s*', '', answer, flags=re.MULTILINE)
+        
+        # 3. Eliminar citaciones numeradas [1], [2], etc.
         answer = re.sub(r'\s*\[\d+\]', ' ', answer)
         
-        # 3. Limpieza de espacios y saltos de línea múltiples
-        answer = re.sub(r'\s{2,}', ' ', answer)  # Reemplaza espacios múltiples por uno
-        answer = re.sub(r'^\s*-\s*', '- ', answer, flags=re.MULTILINE)  # Arregla viñetas
+        # 4. Step markers (Step 1, STEP 2, etc.)
+        answer = re.sub(r'(?:Step|STEP)\s*\d+[\s:]*', '', answer, flags=re.IGNORECASE)
+        
+        # 5. Limpieza de espacios múltiples
+        answer = re.sub(r'[ \t]{2,}', ' ', answer)
+        
+        # 6. Saltos de línea múltiples (máximo 2 seguidos)
+        answer = re.sub(r'\n\s*\n\s*\n', '\n\n', answer)
+        
+        # 7. Normalizar viñetas
+        answer = re.sub(r'^[\s*•]+', '- ', answer, flags=re.MULTILINE)
+        
+        # 8. Remover espacios al inicio de cada línea
+        answer = re.sub(r'^\s+', '', answer, flags=re.MULTILINE)
+        
         answer = answer.strip()
-        # --- FIN DE FILTROS REGEX ---
 
         # Formatear y validar las fuentes (filtrado por score y cantidad)
         sources = format_sources(citations, min_score=MIN_CITATION_SCORE, max_count=MAX_CITATIONS)
